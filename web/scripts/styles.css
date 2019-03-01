@@ -1,0 +1,19 @@
+body {
+	background-color: #fff;
+	margin: 0px;
+	overflow: hidden;
+}
+html{
+	overflow: hidden;
+}
+canvas {
+	background-color:#fff;
+	display:block; 
+	position:absolute; 
+	overflow: hidden;
+}
+.container {
+	width:auto;
+	text-align:center;
+	overflow: hidden;
+}
