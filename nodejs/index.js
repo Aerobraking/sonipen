@@ -13,8 +13,9 @@
  * The only thing you have to change here are the adresses/ports, which are defined right at the top of the code.
  */
 
-var localadress = "127.0.0.1";
+var localAdress = "127.0.0.1";
 var localPort = 57121;
+var remoteAdress = localAdress;
 var remotePort = 57110;
 var webSocketPort = 8080;
 
@@ -43,10 +44,10 @@ var getIPAddresses = function () {
 
 var udp = new osc.UDPPort({
     // This is the port we're listening on.
-    localAddress: localadress,
+    localAddress: localAdress,
     localPort: localPort,
     // This is where sclang is listening for OSC messages.
-    remoteAddress: localadress,
+    remoteAddress: remoteAdress,
     remotePort: remotePort,
     metadata: true
 });
