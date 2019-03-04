@@ -328,6 +328,7 @@ function read_cookie(name) {
 
 class Settings {
     constructor() {
+        this.webSocketAdress = "ws://localhost:8080";
         this.showCollision = false;
         this.showCurvatureCircle = false;
         this.showCurvatureLines = false;

@@ -8,11 +8,11 @@ For Chrome, the website needs to run on a http server (can be a local one), othe
 
 ## How to Start the project
 
-1. Start a node.js server for the nodejs/index.js file. This listens to an websocket port (8080 by default) on your local machine and relays the messages (that are send from the website in the "web" folder) forwad to an udp adress (where the supercollider project listens to). You can change the adresses/ports in the index.js file.
+1. Start a node.js server for the nodejs/index.js file. This listens to an websocket port (8080 by default) on your local machine and relays the messages (that are sent from the website in the "web" folder) forwad to an udp adress (where the supercollider project listens to). You can change all the adresses/ports at the top of the index.js file.
 
-2. Start a supercollider server and start the SynthDef in the supercollider/sonipen_supercollider.scd file
+2. Start a supercollider server and start the SynthDefs in the supercollider/sonipen_supercollider.scd file. (Remember to check that the node.js server sends to the corret port where supercollider listens to)
 
-3. Open the web/sonipen.html and have fun! You can change between different sonifications by changing the handlerType in the GUI to the top right or by pressing the 1...n numpad keys.
+3. Open the web/sonipen.html and have fun! You can change between different sonifications by changing the handlerType in the GUI to the top right or by pressing the 1...n numpad keys. If you need to change the adress of the WebSocket port (where the node.js server runs on), you can do that in the settings.webSocketAdress of the Settings class in the web/scripts/init.js file.
 
 ## How To build your own Sonification
 

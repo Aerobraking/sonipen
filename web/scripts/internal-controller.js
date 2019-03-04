@@ -4,7 +4,7 @@
 
 
 var port = new osc.WebSocketPort({
-	url: "ws://localhost:8080"
+	url: settings.webSocketAdress
 });
 
 port.open();
