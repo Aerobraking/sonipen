@@ -1,15 +1,32 @@
 //--------------------------------------------------
 //  Bi-Directional OSC messaging Websocket <-> UDP
 //--------------------------------------------------
+
+/**
+ * This nodejs server relays messages that are received by an websocket foward
+ * to an udp port.
+ * 
+ * This used to send the osc messaged that are generated on our website to our supercollider 
+ * server that listens to udp. A website can not send udp messaged directly, so we use this here to convert
+ * them.
+ * 
+ * The only thing you have to change here are the adresses/ports, which are defined right at the top of the code.
+ */
+
+var localadress = "127.0.0.1";
+var localPort = 57121;
+var remotePort = 57110;
+var webSocketPort = 8080;
+
 var osc = require("osc"),
     WebSocket = require("ws");
 
 var getIPAddresses = function () {
     var os = require("os"),
-    interfaces = os.networkInterfaces(),
-    ipAddresses = [];
+        interfaces = os.networkInterfaces(),
+        ipAddresses = [];
 
-    for (var deviceName in interfaces){
+    for (var deviceName in interfaces) {
         var addresses = interfaces[deviceName];
 
         for (var i = 0; i < addresses.length; i++) {
@@ -25,13 +42,13 @@ var getIPAddresses = function () {
 };
 
 var udp = new osc.UDPPort({
-      // This is the port we're listening on.
-      localAddress: "127.0.0.1",
-      localPort: 57121,
-      // This is where sclang is listening for OSC messages.
-      remoteAddress: "127.0.0.1",
-      remotePort: 57110,
-      metadata: true
+    // This is the port we're listening on.
+    localAddress: localadress,
+    localPort: localPort,
+    // This is where sclang is listening for OSC messages.
+    remoteAddress: localadress,
+    remotePort: remotePort,
+    metadata: true
 });
 
 udp.on("ready", function () {
@@ -46,25 +63,27 @@ udp.on("ready", function () {
 udp.open();
 
 var wss = new WebSocket.Server({
-    port: 8080
+    port: webSocketPort
 });
 
 wss.on("connection", function (socket) {
-     console.log("A Web Socket connection has been established!!!");
-   
+    console.log("A Web Socket connection has been established!!!");
+
     var socketPort = new osc.WebSocketPort({
         socket: socket,
         metadata: true
     });
 
-    // var relay = new osc.Relay(udp, socketPort, {
-    //     raw: true
-    // });
+    /**
+     This is an existing method for forwarding the message to the udp port.
+     This is an alternative way sending it manually 
+ 
+     var relay = new osc.Relay(udp, socketPort, {
+     raw: true
+     });   
+    */
 
     socketPort.on("message", function (oscMsg) {
-        // console.log("An OSC Message was received!", oscMsg);
-        // console.log(Date.now());
-        // console.log();
         udp.send(oscMsg);
     });
 });

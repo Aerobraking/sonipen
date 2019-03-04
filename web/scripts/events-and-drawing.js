@@ -2,59 +2,21 @@
 
 window.onkeydown = function (e) {
 	let key = event.key.toUpperCase();
-
 	activeHandler.quitSynths();
-
 	switch (key) {
 		case "1":
-			settings.showCollisionDebug = !settings.showCollisionDebug;
+			changeHandler("sonification");
 			break;
 		case "2":
-			settings.showCollision = !settings.showCollision;
+			changeHandler("guiding");
 			break;
 		case "3":
-			settings.showCurvatureCircle = !settings.showCurvatureCircle;
+			changeHandler("template");
 			break;
 		case "4":
-			settings.showCurvatureLines = !settings.showCurvatureLines;
-			break;
-		case "Q":
-			activeHandler = handlerPenSoni;
-			break;
-		case "W":
-			activeHandler = handlerCurvature;
-			break;
-		case "G":
-			settings.showGrid = !settings.showGrid;
-			break;
-		case "N":
-			settings.curvatureDistance -= 0.1;
-			break;
-		case "M":
-			settings.curvatureDistance += 0.1;
-			break;
-		case "R":
-			penpoints = [];
-			cStatic.clearRect(0, 0, canvas.width, canvas.height);
-			cUsage.clearRect(0, 0, canvas.width, canvas.height);
-			indexDrawing = 0;
-			indexUsage = 0;
+			changeHandler("awareness");
 			break;
 	}
-
-	activeHandler.startSynth();
-
-	window.requestAnimationFrame(draw);
-
-	// var canvasImg1 = document.createElement('canvas');
-	// canvasImg1.width = img.width;
-	// canvasImg1.height = img.height;
-	// canvasImg1.getContext('2d').drawImage(img, 0, 0, img.width, img.height);
-	
-	// var pixelData = canvasImg1.getContext('2d').getImageData(234, 123, 1, 1).data;
-	
-	// console.log(pixelData);
-
 }
 
 var sectorMap = new TwoDSectorMap(settings.sectorMapRes);
@@ -76,13 +38,10 @@ var canvas,
 	cStatic,
 	container;
 
-
 var indexUsage = 1;
 
-
-var handlerPenSoni ;
-var handlerCurvature ;
-var activeHandler ;
+var handlerCurvature,handlerTemplate, handlerAwareness,handlerPenSoni;
+var activeHandler;
 
 function draw() {
 
@@ -94,11 +53,11 @@ function draw() {
 
 	c.drawImage(canvasStatic, 0, 0, canvasStatic.width, canvasStatic.height);
 
-	if(settings.showImages){
-		for (var i = 0; i < activeHandler.listImages.length; i++) {
-			var image = activeHandler.listImages[i];
-			c.drawImage(image.canvas, 0, 0, image.canvas.width/2, image.canvas.height/2);
-		}	
+	if (settings.showImagesProbing) {
+		for (var i = 0; i < activeHandler.listImagesProbing.length; i++) {
+			var image = activeHandler.listImagesProbing[i];
+			c.drawImage(image.canvas, 0, 0, image.canvas.width / 2, image.canvas.height / 2);
+		}
 	}
 
 	for (; indexUsage < penpoints.length - 10 && penpoints.length > 1; indexUsage++) {
@@ -111,7 +70,7 @@ function draw() {
 
 		var pointLast = penpoints[indexUsage - 1];
 
-		cUsage.lineWidth = 3;
+		cUsage.lineWidth = 2;
 		cUsage.strokeStyle = "rgb(100,100,100)";
 
 		cUsage.beginPath();
@@ -122,14 +81,20 @@ function draw() {
 
 }
 
+
 var interpolate = 0;
 var isDown = false;
 
 function positionHandler(e) {
 	/* fairly ugly, unoptimised approach of manually replicating the targetTouches array */
 	switch (e.type) {
+		case 'pointerdown':
 		case 'pointermove':
 
+			/**
+			 * When you don't want to use every pen move event, but only every n-th event, this value 
+			 * is the n value for that.
+			 */
 			if (interpolate++ % 1 != 0) {
 				return;
 			}
@@ -167,6 +132,10 @@ function positionHandler(e) {
 	}
 }
 
+var gui;
+
+
+
 function init() {
 	canvas = document.createElement('canvas');
 	c = canvas.getContext('2d');
@@ -196,9 +165,13 @@ function init() {
 	// suppress context menu
 	canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); }, false)
 
+	handlerPenSoni = new HandlerPenSonification();
+	handlerCurvature = new HandlerGuiding();
+	handlerTemplate = new HandlerTemplate();
+	handlerAwareness = new HandlerAwareness();
 
-	var gui = new dat.GUI();
-
+	gui = new dat.GUI();
+	
 	/**
 	 * Saving (uses localstorage) does not work with edge.
 	 */
@@ -224,42 +197,56 @@ function init() {
 	folder1.add(settings, 'showGrid').onChange(function (value) {
 		window.requestAnimationFrame(draw);
 	});
-	folder1.add(settings, 'showImages').onChange(function (value) {
+	folder1.add(settings, 'showImagesProbing').onChange(function (value) {
 		window.requestAnimationFrame(draw);
 	});
 
 	gui.add(settings, 'reset').onChange(function (value) {
 		window.requestAnimationFrame(draw);
 	});
-	gui.add(settings, 'handlerType', ['curvature', 'basis']).onChange(function (value) {
-		
-		activeHandler.quitSynths();
-		console.log(value);
-		switch (value) {
-			case "basis":
-				activeHandler = handlerPenSoni;
-				break;
-			case "curvature":
-				activeHandler = handlerCurvature;
-				break;
-		}
-		activeHandler.startSynth();
-		window.requestAnimationFrame(draw);
-	});
+
+	gui.add(settings, 'handlerType', [ 'sonification','guiding',"template","awareness"]).onChange(changeHandler);
+
+	// activeHandler = handlerCurvature;
+
+	changeHandler(settings.handlerType);
+	activeHandler.startSynth();
 
 
-	
-	  handlerPenSoni = new HandlerPenSonification();
-	 handlerCurvature = new HandlerCurvatureSonifcation();
-	 activeHandler = handlerCurvature;
-
-	 activeHandler.startSynth();
-
- 
+	settings.reset();
 }
 
+function changeHandler(value){
 
+	if(value)
 
+	if(activeHandler!=null){
+		activeHandler.quitSynths();
+	}
+	switch (value) {
+		case "sonification":
+			activeHandler = handlerPenSoni;
+			break;
+		case "guiding":
+			activeHandler = handlerCurvature;
+			break;
+		case "template":
+			activeHandler = handlerTemplate;
+			break;
+		case "awareness":
+			activeHandler = handlerAwareness;
+			break;
+	}
+	settings.handlerType = value;
+
+	for (var i in gui.__controllers) {
+		gui.__controllers[i].updateDisplay();
+	}
+
+	settings.reset();
+	activeHandler.startSynth();
+	window.requestAnimationFrame(draw);
+}
 
 function resetCanvas() {
 	// HiDPI canvas adapted from http://www.html5rocks.com/en/tutorials/canvas/hidpi/

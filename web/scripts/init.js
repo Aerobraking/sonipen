@@ -21,8 +21,6 @@ function ampdb(amp) {
     return 20 * Math.log10(amp);
 }
 
-
-
 class TwoDSectorMap {
 
     constructor(resolution) {
@@ -106,12 +104,26 @@ class Color {
     }
 }
 
+class ImageProbe {
+    constructor(img, canvas, path, list, index, x, y, width, height) {
+        this.img = img;
+        this.canvas = canvas;
+        this.c = canvas.getContext('2d');
+        this.path = path;
+        this.list = list;
+        this.index = index;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        // this.imageData =  c.getImageData(0,0, width,height);
+    }
+}
+
 function getPixelFromImageData(imageData, x, y, width, height) {
 
     var data = imageData.data;
-
     var indexStart = (x * 4) + (y * width * 4);
-
     var pixelData = new Color(data[indexStart], data[indexStart + 1], data[indexStart + 2], data[indexStart + 3]);
 
     return pixelData;
@@ -182,7 +194,6 @@ function calcStraightLine(startCoordinates, endCoordinates) {
     // Return the result
     return coordinatesArray;
 }
-
 
 function distanceVector(vector1, vector2) {
     return Math.sqrt(Math.pow(vector1.x - vector2.x, 2) + Math.pow(vector1.y - vector2.y, 2));
@@ -258,7 +269,6 @@ function normalize(vector) {
 function lineIntersect(as, ad, bs, bd) {
 
     var u = (bd.x * bs.y + bd.y * as.x - bd.y * bs.x - bd.x * as.y) / (bd.x * ad.y - bd.y * ad.x);
-    //u =     (as.y * bd.x + bd.y * bs.x - bs.y * bd.x - bd.y * as.x) / (ad.x * bd.y - ad.y * bd.x);
     ix = as.x + ad.x * u;
     iy = as.y + ad.y * u;
 
@@ -311,18 +321,29 @@ function read_cookie(name) {
 class Settings {
     constructor() {
         this.showCollisionDebug = false;
-        this.showCollision = false;
+        this.showCollision = true;
         this.showCurvatureCircle = false;
         this.showCurvatureLines = false;
         this.curvatureDistance = 1.2;
         this.showGrid = false;
         this.sectorMapRes = 80;
         this.sectorNeighbours = 1;
-        this.handlerType = 'curvature';
-        this.reset = function (){
-            
+        this.handlerType = 'sonification';
+        this.reset = function () { 
+            c.clearRect(0, 0, canvas.width, canvas.height);
+            cUsage.clearRect(0, 0, canvas.width, canvas.height);
+            cStatic.clearRect(0, 0, canvas.width, canvas.height);
+            c.fillStyle("rgb(255,255,255)");
+            c.fillRect(0, 0, canvas.width, canvas.height);
+            cUsage.fillStyle("rgb(255,255,255)");
+            cUsage.fillRect(0, 0, canvas.width, canvas.height);
+            cStatic.fillStyle("rgb(255,255,255)");
+            cStatic.fillRect(0, 0, canvas.width, canvas.height);
+            penpoints=[];
+            indexUsage=1;
+            indexDrawing=1;
         };
-        this.showImages=false;
+        this.showImagesProbing = false;
     }
 }
 

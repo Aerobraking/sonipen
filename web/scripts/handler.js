@@ -1,23 +1,4 @@
 
-
-class Image {
-    constructor(img,canvas, path, list, index,x,y,width,height) {
-        this.img = img;
-        this.canvas=canvas;
-        this.c = canvas.getContext('2d');
-        this.path = path;
-        this.list = list;
-        this.index = index;
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        // this.imageData =  c.getImageData(0,0, width,height);
-
-        
-    }
-}
-
 class PenPoint {
     constructor(x, y, pressure, tiltX, tiltY, timestamp, timestep, isStartPoint) {
 
@@ -27,9 +8,13 @@ class PenPoint {
         this.isStartPoint = isStartPoint;
         this.x = x;
         this.y = y;
-        this.collisionPoints=[];
-        this.imageCollisionPoints=[];
-        this.closestImageDistance=10000;
+        this.collisionPoints = [];
+        /**
+         * Contains the pixel of the image that are on the line between the last point and this point.
+         * Each pixel is represented as a Color object.
+         */
+        this.imageCollisionPoints = [];
+        this.closestImageDistance = 10000;
 
         sectorMap.pushObject(this);
 
@@ -51,18 +36,18 @@ class PenPoint {
 
         this.speed = isStartPoint ? 0 : this.distance / 0.03;
     }
- 
+
     calcCollision() {
 
-          /**
-             * Calculate collision via the already drawn areas.
-             */
-          
+        /**
+           * Calculate collision via the already drawn areas.
+           */
+
         if (this.index > 0 && !this.isStartPoint) {
 
             var xMin = Math.floor(Math.min(this.x, this.lastPoint.x));
             var xMax = Math.ceil(Math.max(this.x, this.lastPoint.x));
-           
+
             var yMin = Math.floor(Math.min(this.y, this.lastPoint.y));
             var yMax = Math.ceil(Math.max(this.y, this.lastPoint.y));
 
@@ -72,20 +57,20 @@ class PenPoint {
             var currentPoint = new Vector(this.x - xMin, this.y - yMin);
             var lastPoint = new Vector(this.lastPoint.x - xMin, this.lastPoint.y - yMin);
 
-            var points = calcStraightLine(lastPoint,currentPoint );
+            var points = calcStraightLine(lastPoint, currentPoint);
 
             var imageData = cUsage.getImageData(xMin, yMin, width, height);
 
             for (var i = 0; i < points.length; i++) {
 
                 var pixelCoord = points[i];
-                var pixel = getPixelFromImageData(imageData, pixelCoord.x, pixelCoord.y, 1, 1);
+                var pixel = getPixelFromImageData(imageData, pixelCoord.x, pixelCoord.y, width, 1);
 
                 pixelCoord.x += xMin;
                 pixelCoord.y += yMin;
 
                 points[i] = pixelCoord;
-                
+
                 if (pixel.r != 0
                     || pixel.g != 0
                     || pixel.b != 0
@@ -98,11 +83,14 @@ class PenPoint {
                 }
             }
 
-            for (var j = 0; j < activeHandler.listImages.length; j++) {
+            /**
+             * Git pixels of the image probings from the current handler.
+             */
+            for (var j = 0; j < activeHandler.listImagesProbing.length; j++) {
 
-                var image = activeHandler.listImages[j];
+                var image = activeHandler.listImagesProbing[j];
 
-                for (var i = points.length-1; i < points.length; i++) {
+                for (var i = points.length - 1; i < points.length; i++) {
                     var pixelCoord = points[i];
                     var localPosition = new Vector(pixelCoord.x + xMin, pixelCoord.y + yMin);
                     imageData = image.c.getImageData(localPosition.x, localPosition.y, 1, 1);
@@ -112,10 +100,10 @@ class PenPoint {
                         || pixel.g != 0
                         || pixel.b != 0
                         || pixel.a != 0) {
-                            this.imageCollisionPoints.push((pixel.r+pixel.g+pixel.b) / 3);
-                      }
-                } 
-            
+                        this.imageCollisionPoints.push(pixel);
+                    }
+                }
+
             }
         }
 
@@ -262,53 +250,58 @@ class PenPoint {
     }
 }
 
-
-var anglePoint1, anglePoint2, anglePoint3;
-var vector1, vector2,
-    vector1N, vector2N,
+var anglePoint1, anglePoint2, anglePoint3,
+    vector1, vector2, vector1N, vector2N,
     vector1MiddlePoint, vector2MiddlePoint,
     vector1Ortho, vector2Ortho,
-    circleCenter,
-    circleRadius;
-
+    circleCenter, circleRadius;
 
 class HandlerBaseClass {
 
     constructor() {
-        this.listImages= [];
+        this.listImagesProbing = [];
+        this.listImagesDrawing = [];
     }
 
-    addImage (path, x, y,width,height) {
+    addImage(path, x, y, width, height, type) {
 
-        
-        var  img = document.createElement("img"); 
-        img.src=path;
+        var img = document.createElement("img");
+        img.src = path;
         img.setAttribute("src", path);
-        img.setAttribute("width", width/2);
-        img.setAttribute("height", height/2); 
+        img.setAttribute("width", width / 2);
+        img.setAttribute("height", height / 2);
         img.style.position = "absolute";
         img.style.left = x + "px";
         img.style.top = y + "px";
-        img.style.zIndex=499;
+        img.style.zIndex = 499;
         // img.style.display = 'none';
-        
+
         document.body.appendChild(img);
 
         var thisHandler = this;
-       
-        setTimeout(function(){
+
+        setTimeout(function () {
             var canvasImg = document.createElement('canvas');
             canvasImg.getContext('2d').scale(1, 1);
             canvasImg.width = 3000;
             canvasImg.height = 2000;
-            canvasImg.getContext('2d').drawImage(img, x, y, img.width*2,img.height*2);
-            var imageContainer = new Image(img,canvasImg,path,thisHandler.listImages,0,x, y,width,height );
-            thisHandler.listImages.push(imageContainer);
-            imageContainer.index = thisHandler.listImages.length -1;
-    
-            
-            img.style.zIndex=-400;
-        }, 1100);
+            canvasImg.getContext('2d').drawImage(img, x, y, img.width * 2, img.height * 2);
+
+            var imageContainer = new ImageProbe(img, canvasImg, path, thisHandler.listImagesProbing, 0, x, y, width, height);
+
+            switch (type) {
+                case "probing":
+                    thisHandler.listImagesProbing.push(imageContainer);
+                    imageContainer.index = thisHandler.listImagesProbing.length - 1;
+                    break;
+                case "drawing":
+                    thisHandler.listImagesDrawing.push(imageContainer);
+                    imageContainer.index = thisHandler.listImagesDrawing.length - 1;
+                    break;
+            }
+
+            img.style.zIndex = -400;
+        }, 100);
 
     }
 
@@ -321,7 +314,6 @@ class HandlerBaseClass {
     stopSounds() { }
 
     drawStatic(width, height, c) {
-
 
         for (; indexDrawing < penpoints.length && penpoints.length > 1; indexDrawing++) {
 
@@ -340,16 +332,17 @@ class HandlerBaseClass {
             cStatic.moveTo(point.x, point.y);
             cStatic.lineTo(pointLast.x, pointLast.y);
             cStatic.stroke();
-
-            // if(indexDrawing % 12 == 0){
-            //  cStatic.fillStyle = "rgba(25,0,25,0.3)";
-            // c.fillRect(point.x-3,point.y-3,6,6);
-            // }
         }
 
     }
 
     drawRefresh(width, height, c) {
+
+        for (var i = 0; i < this.listImagesDrawing.length; i++) {
+            var image = this.listImagesDrawing[i];
+            c.drawImage(image.canvas, 0, 0, image.canvas.width / 2, image.canvas.height / 2);
+        }
+
 
         if (settings.showGrid) {
             c.strokeStyle = "rgba(100,0,0,0.3)";
@@ -381,7 +374,6 @@ class HandlerBaseClass {
                 key[1] * sectorMap.resolution - (neighbourSize * sectorMap.resolution),
                 sectorMap.resolution * (1 + 2 * neighbourSize),
                 sectorMap.resolution * (1 + 2 * neighbourSize));
-
 
             var sectors = sectorMap.getSectorWithNeighbours(penpoints[penpoints.length - 1], neighbourSize);
 
@@ -418,7 +410,80 @@ class HandlerBaseClass {
                         c.fillRect(point.collisionPoints[j].x - (size / 2), point.collisionPoints[j].y - (size / 2), (size), (size));
                     }
                 }
+
+
+                if(i == penpoints.length-1){
+
+                    var xMin = Math.floor(Math.min(point.x, point.lastPoint.x));
+                    var xMax = Math.ceil(Math.max(point.x, point.lastPoint.x));
+        
+                    var yMin = Math.floor(Math.min(point.y, point.lastPoint.y));
+                    var yMax = Math.ceil(Math.max(point.y, point.lastPoint.y));
+        
+                    var width = Math.max(xMax - xMin, 1);
+                    var height = Math.max(yMax - yMin, 1);
+        
+                    var currentPoint = new Vector(point.x - xMin, point.y - yMin);
+                    var lastPoint = new Vector(point.lastPoint.x - xMin, point.lastPoint.y - yMin);
+        
+                    var points = calcStraightLine(lastPoint, currentPoint);
+        
+                    c.fillStyle = "rgba(255,0,255,1)";
+                    c.fillRect(xMin,yMin,width,height);
+
+                    // c.fillStyle = "rgba(0,0,255,1)";
+                  
+                    var imageData = cUsage.getImageData(xMin, yMin, width, height);
+
+                    for (var x = 0; x < width; x++) {
+                        for (var y = 0; y < height; y++) {
+                            var pixel = getPixelFromImageData(imageData, x, y, width, 1);
+                            c.fillStyle = "rgba("+pixel.r+","+pixel.g+","+pixel.b+",1)";
+                          c.fillRect(x,y,1,1);
+                        }
+                    }
+
+
+                    // for (var i = 0; i < points.length; i++) {
+        
+                        // var pixelCoord = points[i];
+                        // var pixel = getPixelFromImageData(imageData, pixelCoord.x, pixelCoord.y, 1, 1);
+        
+                        // pixelCoord.x += xMin;
+                        // pixelCoord.y += yMin;
+        
+
+                        // c.fillStyle = "rgba("+pixel.r+","+pixel.g+","+pixel.b+",1)";
+                 
+
+                        // c.fillRect(pixelCoord.x - (2 / 2), pixelCoord.y - (2 / 2), (2), (2));
+                  
+                        
+
+
+                        // points[i] = pixelCoord;
+        
+                        // if (pixel.r != 0
+                        //     || pixel.g != 0
+                        //     || pixel.b != 0
+                        //     || pixel.a != 0) {
+        
+                        //     this.collisionPoints.push(pixelCoord);
+                        //     this.collision = true;
+                        //     this.collisionX = this.x;
+                        //     this.collisionY = this.y;
+                        // }
+                    // }
+
+                }
+
+
             }
+
+
+
+
+
         }
 
         if (settings.showCurvatureLines) {
@@ -484,18 +549,16 @@ class HandlerBaseClass {
 
         }
 
+
     }
 
 }
-
 
 class HandlerPenSonification extends HandlerBaseClass {
 
     constructor() {
         super();
         this.sinnode_id = 1234;
-        this.collisionCounter = 0;
-        // this.addImage("images/test1.png",0,0,3000,2000); 
     }
 
     stopSounds() {
@@ -515,53 +578,170 @@ class HandlerPenSonification extends HandlerBaseClass {
     startSynth() {
         port.send({
             address: "/s_new",
-            args: ["noise", this.sinnode_id, 1, 0, "amp", 0]
+            args: ["pen", this.sinnode_id, 1, 0, "amp", 0]
         });
     }
 
     update(penpoints, newPoint, lastPoint) {
-        if (lastPoint.speed != newPoint.speed) {
+        if (newPoint.speed > 0) {
 
-            var amp = linlin(newPoint.speed, 0, 50, 0, 1);
 
-            if (newPoint.collision) {
-                this.collisionCounter = 2;
-            } else {
-                this.collisionCounter--;
+            var amp = newPoint.pressure;
+
+            amp *= (Math.min(Math.pow(newPoint.speed, 1), 1));
+
+            var speed = linlin(newPoint.speed, 0, 50, 0.1, 1);
+
+            if (newPoint.speed != lastPoint.speed) {
+                port.send({
+                    address: "/n_set",
+                    args: [this.sinnode_id, "amp", amp, "freq", true ? speed * 13000 : 2600,
+                        "speed", speed, "rate", 1]
+                });
             }
-
-            if (this.collisionCounter > 0) {
-                amp = 2;
-            }
+        } else {
 
             port.send({
                 address: "/n_set",
-                args: [this.sinnode_id, "amp", amp, "freq", false ? newPoint.speed * 40 : 130]
+                args: [this.sinnode_id, "amp", 0]
             });
         }
     }
 
-
-
 }
 
-class HandlerCurvatureSonifcation extends HandlerBaseClass {
+class HandlerGuiding extends HandlerBaseClass {
+
+    constructor() {
+        super();
+        this.sinnode_id = 1762;
+        this.angleS = 0;
+        this.addImage("images/guiding_drawing.png", 0, 0, 3000, 2000, "drawing");
+    }
+
+    stopSounds() {
+        port.send({
+            address: "/n_set",
+            args: [this.sinnode_id, "amp", 0]
+        });
+    }
+
+    quitSynths() {
+        port.send({
+            address: "/n_free",
+            args: [this.sinnode_id]
+        });
+    }
+
+    startSynth() {
+        port.send({
+            address: "/s_new",
+            args: ["guiding", this.sinnode_id, 0, 0, "amp", 0]
+        });
+    }
+
+    update(penpoints, newPoint, lastPoint) {
+
+        var angleDegree = (Math.floor(newPoint.curvature * 360 / Math.PI));
+
+        if (isNaN(angleDegree)) {
+            angleDegree = 0;
+        }
+
+        var amp = linlin(newPoint.pressure * newPoint.speed, 0, 20, 0, 1);
+
+        if (newPoint.imageCollisionPoints.length > 0) {
+            amp += linlin(newPoint.imageCollisionPoints[0], 0, 255, 0, 1);
+        }
+
+        if (lastPoint.speed != newPoint.speed) {
+            port.send({
+                address: "/n_set",
+                args: [this.sinnode_id, "amp", amp, "freq", angleDegree + 200]
+            });
+        }
+    }
+}
+
+class HandlerAwareness extends HandlerBaseClass {
 
     constructor() {
         super();
         this.sinnode_id = 1235;
-        this.angleS = 0;    
-        this.addImage("images/test1.png",0,0,3000,2000); 
+        this.angleS = 0;
+        this.addImage("images/awareness_drawing.png", 0, 0, 3000, 2000, "drawing");
+        this.addImage("images/awareness_probing.png", 0, 0, 3000, 2000, "probing");
     }
 
-    drawRefresh(width, height, c) {
-        HandlerBaseClass.prototype.drawRefresh(width, height, c);
+    stopSounds() {
+        port.send({
+            address: "/n_set",
+            args: [this.sinnode_id, "amp", 0]
+        });
+    }
 
-        c.strokeStyle = "rgba(0,0,0,1.0)";
-        c.beginPath();
-        c.arc(canvas.width / 4, canvas.height / 4, 150, 0, 2 * Math.PI);
-        c.stroke();
+    quitSynths() {
+        port.send({
+            address: "/n_free",
+            args: [this.sinnode_id]
+        });
+    }
 
+    startSynth() {
+        port.send({
+            address: "/s_new",
+            args: ["pen", this.sinnode_id, 1, 0, "amp", 0]
+        });
+    }
+
+    update(penpoints, newPoint, lastPoint) {
+        if (newPoint.speed > 0) {
+
+
+            var amp = newPoint.pressure;
+
+            amp *= (Math.min(Math.pow(newPoint.speed, 1), 1));
+
+            var speed = linlin(newPoint.speed, 0, 50, 0.1, 1);
+
+            /**
+            * Je dunkler, desto höher die frequenz. Wenn es rot ist, dann wird es silent.
+            */
+            if (newPoint.imageCollisionPoints.length > 0) {
+                speed += 1.3 * linlin(newPoint.imageCollisionPoints[0].r, 255, 0, 0, 1);
+
+                if (newPoint.imageCollisionPoints[0].r > 100 && newPoint.imageCollisionPoints[0].g < 100) {
+                    speed *= 3;
+                    amp = 0;
+                }
+
+            }
+
+            if (newPoint.speed != lastPoint.speed) {
+                port.send({
+                    address: "/n_set",
+                    args: [this.sinnode_id, "amp", amp, "freq", true ? speed * 13000 : 2600,
+                        "speed", speed, "rate", 1]
+                });
+            }
+        } else {
+
+            port.send({
+                address: "/n_set",
+                args: [this.sinnode_id, "amp", 0]
+            });
+        }
+    }
+
+}
+
+class HandlerTemplate extends HandlerBaseClass {
+
+    constructor() {
+        super();
+        this.sinnode_id = 4123;
+        this.addImage("images/template_probing.png", 0, 0, 3000, 2000, "probing");
+        this.addImage("images/template_drawing.png", 0, 0, 3000, 2000, "drawing");
     }
 
     stopSounds() {
@@ -587,22 +767,16 @@ class HandlerCurvatureSonifcation extends HandlerBaseClass {
 
     update(penpoints, newPoint, lastPoint) {
 
-        var angleDegree = (Math.floor(newPoint.curvature * 360 / Math.PI));
+        var amp = linlin(newPoint.pressure, 0, 20, 0, 1);
 
-        if (isNaN(angleDegree)) {
-            angleDegree = 0;
-        }
-
-        var amp = linlin(newPoint.pressure * newPoint.speed, 0, 20, 0, 1);
-
-        if(newPoint.imageCollisionPoints.length>0){
-            amp += linlin(newPoint.imageCollisionPoints[0],0,255,0,1);
+        if (newPoint.imageCollisionPoints.length > 0) {
+            amp += linlin(newPoint.imageCollisionPoints[0].r, 0, 255, 1, 0);
         }
 
         if (lastPoint.speed != newPoint.speed) {
             port.send({
                 address: "/n_set",
-                args: [this.sinnode_id, "amp", amp, "freq", angleDegree + 200]
+                args: [this.sinnode_id, "amp", amp, "freq", 800]
             });
         }
     }
