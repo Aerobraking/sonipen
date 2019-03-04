@@ -472,9 +472,7 @@ class PenPoint {
                 for (var i = 0; i < points.length; i++) {
                     var pixelCoord = points[i];
                     
-                    console.log(xMin*2, yMin*2);
                     var pixel = getPixelFromImageData(imageData, pixelCoord.x-xMin, pixelCoord.y-yMin, width*2, 1);
-                    console.log(pixelCoord);
                     this.imageCollisionPoints.push(pixel);
                 }
 
