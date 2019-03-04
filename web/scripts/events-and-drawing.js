@@ -1,26 +1,7 @@
 
 
-window.onkeydown = function (e) {
-	let key = event.key.toUpperCase();
-	activeHandler.quitSynths();
-	switch (key) {
-		case "1":
-			changeHandler("sonification");
-			break;
-		case "2":
-			changeHandler("guiding");
-			break;
-		case "3":
-			changeHandler("template");
-			break;
-		case "4":
-			changeHandler("awareness");
-			break;
-	}
-}
 
-var sectorMap = new TwoDSectorMap(settings.sectorMapRes);
-var penpoints = [];
+
 
 var port = new osc.WebSocketPort({
 	url: "ws://localhost:8080"
@@ -40,7 +21,6 @@ var canvas,
 
 var indexUsage = 1;
 
-var handlerCurvature,handlerTemplate, handlerAwareness,handlerPenSoni;
 var activeHandler;
 
 function draw() {
@@ -60,7 +40,7 @@ function draw() {
 		}
 	}
 
-	for (; indexUsage < penpoints.length - 10 && penpoints.length > 1; indexUsage++) {
+	for (; indexUsage < penpoints.length - 3 && penpoints.length > 1; indexUsage++) {
 
 		var point = penpoints[indexUsage];
 
@@ -137,39 +117,24 @@ var gui;
 
 
 function init() {
-	canvas = document.createElement('canvas');
-	c = canvas.getContext('2d');
-	canvasStatic = document.createElement('canvas');
-	cStatic = canvasStatic.getContext('2d');
-	canvasUsage = document.createElement('canvas');
-	cUsage = canvasUsage.getContext('2d');
-	container = document.createElement('div');
-	container.className = "container";
-	resetCanvas();
-	container.appendChild(canvas);
-	document.body.appendChild(container);
-	var events = [];
-	/* feature detect - in this case not dangerous, as pointer is not exclusively touch */
-	if ((window.PointerEvent) || (window.navigator.pointerEnabled) || (window.navigator.msPointerEnabled)) {
-		events = ['pointerover', 'pointerdown', 'pointermove', 'pointerup', 'pointerout', 'pointercancel',
-			'MSPointerOver', 'MSPointerDown', 'MSPointerMove', 'MSPointerUp', 'MSPointerOut', 'MSPointerCancel'];
-	} else {
-		events = ['mouseover', 'mousedown', 'mousemove', 'mouseup', 'mouseout',
-			'touchstart', 'touchmove', 'touchend', 'touchcancel'];
+	
+	prepareCanvas();
+
+	/**
+	 * Switch between the available handlers.
+	 */
+	window.onkeydown = function (e) {
+		let key = event.key.toUpperCase();
+		activeHandler.quitSynths();
+
+		var number= parseInt(key);
+
+		setActiveHandler(handlerList[number-1].id);
 	}
 
-	for (var i = 0, l = events.length; i < l; i++) {
-		canvas.addEventListener(events[i], positionHandler, false);
-	}
-
-	// suppress context menu
-	canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); }, false)
-
-	handlerPenSoni = new HandlerPenSonification();
-	handlerCurvature = new HandlerGuiding();
-	handlerTemplate = new HandlerTemplate();
-	handlerAwareness = new HandlerAwareness();
-
+	/**
+	 * From here on the gui will be created.
+	 */
 	gui = new dat.GUI();
 	
 	/**
@@ -179,9 +144,6 @@ function init() {
 
 	var folder1 = gui.addFolder('Debug');
 
-	folder1.add(settings, 'showCollisionDebug').onChange(function (value) {
-		window.requestAnimationFrame(draw);
-	});
 	folder1.add(settings, 'showCollision').onChange(function (value) {
 		window.requestAnimationFrame(draw);
 	});
@@ -200,43 +162,48 @@ function init() {
 	folder1.add(settings, 'showImagesProbing').onChange(function (value) {
 		window.requestAnimationFrame(draw);
 	});
-
 	gui.add(settings, 'reset').onChange(function (value) {
 		window.requestAnimationFrame(draw);
 	});
 
-	gui.add(settings, 'handlerType', [ 'sonification','guiding',"template","awareness"]).onChange(changeHandler);
+	/**
+	 * Get the ids of the existing handlers to make them available as a list in the GUI.
+	 */
+	var handlerIds = [];
+	for(var i = 0; i<handlerList.length;i++){
+		handlerIds.push(handlerList[i].id);
+	}
+	gui.add(settings, 'handlerType', handlerIds).onChange(setActiveHandler);
 
-	// activeHandler = handlerCurvature;
 
-	changeHandler(settings.handlerType);
-	activeHandler.startSynth();
-
-
+	setActiveHandler(settings.handlerType);
+	
 	settings.reset();
 }
 
-function changeHandler(value){
-
-	if(value)
+function setActiveHandler(value){
 
 	if(activeHandler!=null){
 		activeHandler.quitSynths();
 	}
-	switch (value) {
-		case "sonification":
-			activeHandler = handlerPenSoni;
-			break;
-		case "guiding":
-			activeHandler = handlerCurvature;
-			break;
-		case "template":
-			activeHandler = handlerTemplate;
-			break;
-		case "awareness":
-			activeHandler = handlerAwareness;
-			break;
+
+	/**
+	 * Search for handler with fitting id
+	 */
+	for(var i = 0; i<handlerList.length;i++){
+		if(value == handlerList[i].id){
+			activeHandler = handlerList[i];
+		}
 	}
+
+	/**
+	 * If no handler is found, take the first one that is available.
+	 */
+	if(activeHandler==null){
+		activeHandler = handlerList[0];
+		value = handlerList[0].id;
+	}
+
 	settings.handlerType = value;
 
 	for (var i in gui.__controllers) {
@@ -248,7 +215,20 @@ function changeHandler(value){
 	window.requestAnimationFrame(draw);
 }
 
-function resetCanvas() {
+/**
+ * Creates all the canvases we need, sets their size and add the event listeners.
+ */
+function prepareCanvas() {
+
+	canvas = document.createElement('canvas');
+	c = canvas.getContext('2d');
+	canvasStatic = document.createElement('canvas');
+	cStatic = canvasStatic.getContext('2d');
+	canvasUsage = document.createElement('canvas');
+	cUsage = canvasUsage.getContext('2d');
+	container = document.createElement('div');
+	container.className = "container";
+
 	// HiDPI canvas adapted from http://www.html5rocks.com/en/tutorials/canvas/hidpi/
 	devicePixelRatio = window.devicePixelRatio || 1;
 	canvas.width = window.innerWidth * devicePixelRatio;
@@ -268,17 +248,32 @@ function resetCanvas() {
 	canvasUsage.style.width = window.innerWidth + 'px';
 	canvasUsage.style.height = window.innerHeight + 'px';
 	//cRepaint.scale(devicePixelRatio, devicePixelRatio);
+
+	container.appendChild(canvas);
+	document.body.appendChild(container);
+	var events = [];
+	/* feature detect - in this case not dangerous, as pointer is not exclusively touch */
+	if ((window.PointerEvent) || (window.navigator.pointerEnabled) || (window.navigator.msPointerEnabled)) {
+		events = ['pointerover', 'pointerdown', 'pointermove', 'pointerup', 'pointerout', 'pointercancel',
+			'MSPointerOver', 'MSPointerDown', 'MSPointerMove', 'MSPointerUp', 'MSPointerOut', 'MSPointerCancel'];
+	} else {
+		events = ['mouseover', 'mousedown', 'mousemove', 'mouseup', 'mouseout',
+			'touchstart', 'touchmove', 'touchend', 'touchcancel'];
+	}
+
+	for (var i = 0, l = events.length; i < l; i++) {
+		canvas.addEventListener(events[i], positionHandler, false);
+	}
+
+	// suppress context menu
+	canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); }, false)
 }
 
+/* 
+hack to prevent firing the init script before the window object's values are populated 
+*/	
 window.addEventListener('load', function () {
-	/* hack to prevent firing the init script before the window object's values are populated */
 	setTimeout(init, 100);
 }, false);
 
-window.addEventListener("beforeunload", function (e) {
 
-	bake_cookie("settings", settings);
-
-	activeHandler.quitSynths();
-
-});
