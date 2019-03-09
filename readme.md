@@ -6,13 +6,25 @@ It currently supports Edge and Chrome with a surface pen.
 
 For Chrome, the website needs to run on a http server (can be a local one), otherwise the getImageData() from a canvas throws a security exception.
 
-## How to Start the project
 
-1. Start a node.js server for the nodejs/index.js file. This listens to an websocket port (8080 by default) on your local machine and relays the messages (that are sent from the website in the "web" folder) forwad to an udp adress (where the supercollider project listens to). You can change all the adresses/ports at the top of the index.js file.
+## How to Use the project
 
-2. Start a supercollider server and start the SynthDefs in the supercollider/sonipen_supercollider.scd file. (Remember to check that the node.js server sends to the corret port where supercollider listens to)
+### Setup everything
 
-3. Open the web/sonipen.html and have fun! You can change between different sonifications by changing the handlerType in the GUI to the top right or by pressing the 1...n numpad keys. If you need to change the adress of the WebSocket port (where the node.js server runs on), you can do that in the settings.webSocketAdress of the Settings class in the web/scripts/init.js file.
+1. Install Node.js. You can get the installer here: https://nodejs.org/en/
+
+2. Install Supercollider (testet with version 3.9.3). You can get the installer here: https://supercollider.github.io/download
+
+3. Navigate to the sonipen/nodejs in the command line and run <code>npm install</code>
+
+### Start the project
+
+1. Start a node.js server for the /nodejs folder. You can do that in the console by navigating into the folder and enter the command "node .", the message "which Listening for OSC over UDP ..." should then appear (If it doesnt work, you may have to execute <code>npm rebuild serialport</code> once). This server listens to an websocket port (8080 by default) on your local machine and relays the messages (that are sent from the website in the "web" folder) forwad to an udp adress (where the supercollider project listens to). You can change all the adresses/ports at the top of the /nodejs/index.js file.
+
+2. Start a supercollider server and start the SynthDefs in the /supercollider/sonipen_supercollider.scd file. (Remember to check that the node.js server sends to the corret port where supercollider listens to). If the sound files can not be loaded, check the top of the scd file, you may have to update the paths to the files, (Supercollider doesn't work so well with relative paths).
+
+3. Open the /web/sonipen.html and have fun! You can change between different sonifications by changing the handlerType in the GUI to the top right or by pressing the 1...n numpad keys. If you need to change the adress of the WebSocket port (where the node.js server runs on), you can do that in the settings.webSocketAdress of the Settings class in the web/scripts/init.js file.
+
 
 ## How To build your own Sonification
 

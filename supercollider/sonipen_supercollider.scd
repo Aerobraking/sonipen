@@ -4,23 +4,21 @@
 kr macht das gleiche, ist aber weniger rechenaufwändig und sollte für berechnungen genutzt werden die dann letztendlich das höhrende erzeugen
 
 STRG + D um Dokumentation zu öffnen für Selektion
-*/
 
 // Frequens Fenster starten
 FreqScope.new(400);
 
+*/
 
-s.freeAll()
-{ BPF.ar(WhiteNoise.ar(1),158, 0.11,0.1) }.play;
-{ BPF.ar(WhiteNoise.ar(1),600, 0.02,0.8) }.play;
-{ BPF.ar(WhiteNoise.ar(1),8000, 0.01,0.01) }.play;
-{ BPF.ar(WhiteNoise.ar(1),12000, 0.04,0.002) }.play;
-{ BPF.ar(WhiteNoise.ar(1),16000, 0.04,0.002) }.play;
-
-
+/**
+If the autmatic relative path creation doesn't work, you have to
+set the absolute paths manually here.
+*/
+var whitenoise = PathName(thisProcess.nowExecutingPath).pathOnly ++ "sounds/whitenoise.wav";
 
 // allocate a buffer with a sound file
-b = Buffer.read(s,"C:/whitenoise.wav");
+b = Buffer.read(s,whitenoise);
+
 
 (
 SynthDef( \pen, { | amp = 1, freq = 100, speed = 1, rate = 1 |
@@ -74,3 +72,5 @@ SynthDef( \template,	{ | amp = 0, freq = 1000, trig = 1 |
 	Out.ar( [ 0 ], sig * 0.6 );
 }).add;
 )
+
+s.freeAll()

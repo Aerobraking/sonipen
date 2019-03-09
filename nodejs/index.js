@@ -1,5 +1,7 @@
 //--------------------------------------------------
-//  Bi-Directional OSC messaging Websocket <-> UDP
+//  Taken From:
+//  Bi-Directional OSC messaging Websocket <-> UDP (Example Project rom Github)
+//  https://github.com/colinbdclark/osc.js-examples
 //--------------------------------------------------
 
 /**
