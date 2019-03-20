@@ -165,18 +165,24 @@ class HandlerAwareness extends HandlerBaseClass {
             */
            
             // speed += 1.3 * linlin(newPoint.imageCollisionPoints[0].r, 255, 0, 0, 1);
-
-                for(var i = 0; i<newPoint.imageCollisionPoints.length; i++){
-                    if (newPoint.imageCollisionPoints[i].r > 100 && newPoint.imageCollisionPoints[i].g < 100) {
-                        speed *= 3;
-                        amp = 0;
-                        
-                        // console.log(newPoint.imageCollisionPoints);
-                        break;
-                    }
+            var found = false;
+            for(var i = 0; i<newPoint.imageCollisionPoints.length; i++){
+                if (newPoint.imageCollisionPoints[i].r > 100 && newPoint.imageCollisionPoints[i].g < 100) {
+                    speed *= 3;
+                    amp = 0;
+                    // console.log(newPoint.imageCollisionPoints);
+                    found = true;
+                    break;
                 }
+            }
+
+            if(!found){
+                // for(var i = 0; i<newPoint.imageCollisionPoints.length; i++){
+                //    console.log("roter farbwert: "+newPoint.imageCollisionPoints[i].r);
+                // } 
+            }
                
-          
+            // console.log(amp + "found: "+ found + " collisionpoints: "+newPoint.imageCollisionPoints.length);
                 
             if (newPoint.speed != lastPoint.speed) {
                 port.send({

@@ -134,6 +134,10 @@ function getPixelFromImageData(imageData, x, y, width, height) {
     var indexStart = (x * 4) + (y * width * 4);
     var pixelData = new Color(data[indexStart], data[indexStart + 1], data[indexStart + 2], data[indexStart + 3]);
 
+    if(indexStart+3 > data.length){
+        console.log("Pixel coordinate outside of image data in getPixelFromImageData()");
+    }
+
     return pixelData;
 }
 
@@ -431,8 +435,8 @@ class PenPoint {
             var yMin = Math.floor(Math.min(this.y, this.lastPoint.y));
             var yMax = Math.ceil(Math.max(this.y, this.lastPoint.y));
 
-            var width = Math.max(xMax - xMin, 1);
-            var height = Math.max(yMax - yMin, 1);
+            var width = Math.max((xMax - xMin)+1, 1);
+            var height = Math.max((yMax - yMin)+1, 1);
 
             var currentPoint = new Vector(this.x - xMin, this.y - yMin);
             var lastPoint = new Vector(this.lastPoint.x - xMin, this.lastPoint.y - yMin);
@@ -469,12 +473,17 @@ class PenPoint {
 
                 var image = activeHandler.listImagesProbing[j];
 
-                imageData = image.c.getImageData(xMin*2, yMin*2, width*2, height*2);
+                imageData = image.c.getImageData(xMin, yMin, width, height);
 
                 for (var i = 0; i < points.length; i++) {
                     var pixelCoord = points[i];
                     
-                    var pixel = getPixelFromImageData(imageData, pixelCoord.x-xMin, pixelCoord.y-yMin, width*2, 1);
+                    var pixel = getPixelFromImageData(imageData, pixelCoord.x-xMin, pixelCoord.y-yMin, width, height);
+                   
+                    if(pixel.r<100){
+                        console.log("schwarzer pixel");
+                    }
+                   
                     this.imageCollisionPoints.push(pixel);
                 }
 
@@ -722,6 +731,11 @@ class HandlerBaseClass {
             canvasImg.height = window.innerWidth * devicePixelRatio;
             canvasImg.getContext('2d').drawImage(img, x, y, img.width, img.height );
 
+
+            console.log("addImage: canvas-width: "+canvasImg.width);
+            console.log("addImage: img-width: "+img.width);
+
+
             var imageContainer = new ImageProbe(img, canvasImg, path, thisHandler.listImagesProbing, 0, x, y, width, height);
 
             switch (type) {
@@ -736,7 +750,7 @@ class HandlerBaseClass {
             }
 
             img.style.zIndex = -400;
-        }, 100);
+        }, 300);
 
     }
 
@@ -761,7 +775,7 @@ class HandlerBaseClass {
 
             var pointLast = penpoints[indexDrawing - 1];
 
-            var lineWidth = 0.5 + 3* pointLast.tilt;
+            var lineWidth = 1 + 5* pointLast.tilt;
 
             c.lineWidth = lineWidth;
         
@@ -780,9 +794,15 @@ class HandlerBaseClass {
 
         for (var i = 0; i < this.listImagesDrawing.length; i++) {
             var image = this.listImagesDrawing[i];
-            c.drawImage(image.canvas, 0, 0, image.canvas.width / 2, image.canvas.height / 2);
+            c.drawImage(image.canvas, 0, 0, image.canvas.width , image.canvas.height );
         }
 
+        if(settings.showImagesProbing){
+            for (var i = 0; i < this.listImagesProbing.length; i++) {
+                var image = this.listImagesProbing[i];
+                c.drawImage(image.canvas, 0, 0, image.canvas.width , image.canvas.height );
+            }
+        }        
 
         if (settings.showGrid) {
             c.strokeStyle = "rgba(100,0,0,0.3)";

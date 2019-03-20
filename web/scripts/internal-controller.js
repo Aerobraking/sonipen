@@ -33,13 +33,6 @@ function draw() {
 
 	c.drawImage(canvasStatic, 0, 0, canvasStatic.width, canvasStatic.height);
 
-	if (settings.showImagesProbing) {
-		for (var i = 0; i < activeHandler.listImagesProbing.length; i++) {
-			var image = activeHandler.listImagesProbing[i];
-			c.drawImage(image.canvas, 0, 0, image.canvas.width / 2, image.canvas.height / 2);
-		}
-	}
-
 	for (; indexUsage < penpoints.length - 3 && penpoints.length > 1; indexUsage++) {
 
 		var point = penpoints[indexUsage];
