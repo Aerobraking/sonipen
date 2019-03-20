@@ -134,10 +134,6 @@ function getPixelFromImageData(imageData, x, y, width, height) {
     var indexStart = (x * 4) + (y * width * 4);
     var pixelData = new Color(data[indexStart], data[indexStart + 1], data[indexStart + 2], data[indexStart + 3]);
 
-    if(indexStart+3 > data.length){
-        console.log("Pixel coordinate outside of image data in getPixelFromImageData()");
-    }
-
     return pixelData;
 }
 
@@ -479,11 +475,7 @@ class PenPoint {
                     var pixelCoord = points[i];
                     
                     var pixel = getPixelFromImageData(imageData, pixelCoord.x-xMin, pixelCoord.y-yMin, width, height);
-                   
-                    if(pixel.r<100){
-                        console.log("schwarzer pixel");
-                    }
-                   
+                                      
                     this.imageCollisionPoints.push(pixel);
                 }
 
@@ -730,11 +722,6 @@ class HandlerBaseClass {
             canvasImg.width = window.innerWidth * devicePixelRatio;
             canvasImg.height = window.innerWidth * devicePixelRatio;
             canvasImg.getContext('2d').drawImage(img, x, y, img.width, img.height );
-
-
-            console.log("addImage: canvas-width: "+canvasImg.width);
-            console.log("addImage: img-width: "+img.width);
-
 
             var imageContainer = new ImageProbe(img, canvasImg, path, thisHandler.listImagesProbing, 0, x, y, width, height);
 

@@ -230,29 +230,22 @@ function prepareCanvas() {
 
 	// HiDPI canvas adapted from http://www.html5rocks.com/en/tutorials/canvas/hidpi/
 	devicePixelRatio = window.devicePixelRatio || 1;
-	console.log("devicePixelRatio: "+devicePixelRatio);
+	
 	canvas.width = window.innerWidth * devicePixelRatio;
 	canvas.height = window.innerHeight * devicePixelRatio;
 	canvas.style.width = window.innerWidth + 'px';
 	canvas.style.height = window.innerHeight + 'px';
-	//c.scale(devicePixelRatio, devicePixelRatio);
 
 	canvasStatic.width = window.innerWidth * devicePixelRatio ;
 	canvasStatic.height = window.innerHeight * devicePixelRatio;
 
-	console.log("window height: "+window.innerHeight );
-	console.log("canvas width: "+canvasStatic.width);
-	console.log("canvas height: "+canvasStatic.height);
-
 	canvasStatic.style.width = window.innerWidth + 'px';
 	canvasStatic.style.height = window.innerHeight + 'px';
-
 
 	canvasUsage.width = window.innerWidth * devicePixelRatio;
 	canvasUsage.height = window.innerHeight * devicePixelRatio;
 	canvasUsage.style.width = window.innerWidth + 'px';
 	canvasUsage.style.height = window.innerHeight + 'px';
-	//cRepaint.scale(devicePixelRatio, devicePixelRatio);
 
 	container.appendChild(canvas);
 	document.body.appendChild(container);
