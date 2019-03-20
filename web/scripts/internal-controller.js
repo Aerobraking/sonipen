@@ -50,7 +50,9 @@ function draw() {
 
 		var pointLast = penpoints[indexUsage - 1];
 
-		cUsage.lineWidth = 2;
+		var lineWidth = 1 + 2.5* pointLast.tilt;
+
+		cUsage.lineWidth = lineWidth;
 		cUsage.strokeStyle = "rgb(100,100,100)";
 
 		cUsage.beginPath();

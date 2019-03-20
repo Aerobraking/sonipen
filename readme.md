@@ -4,7 +4,7 @@ This project is a base for creating sonifications of pen input in the browser.
 
 It currently supports Edge and Chrome with a surface pen.
 
-For Chrome, the website needs to run on a http server (can be a local one), otherwise the getImageData() from a canvas throws a security exception.
+For Chrome, the website needs to run on a (local) http server, otherwise the getImageData() from a canvas throws a security exception.
 
 
 ## How to Use the project
@@ -15,7 +15,7 @@ For Chrome, the website needs to run on a http server (can be a local one), othe
 
 2. Install Supercollider (testet with version 3.9.3). You can get the installer here: https://supercollider.github.io/download
 
-3. Navigate to the sonipen/nodejs in the command line and run <code>npm install</code>
+3. Navigate to the /nodejs folder in the command line and run <code>npm install</code>
 
 ### Start the project
 

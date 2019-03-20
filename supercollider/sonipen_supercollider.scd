@@ -40,13 +40,16 @@ SynthDef( \pen, { | amp = 1, freq = 100, speed = 1, rate = 1 |
 	*/
     x = Phasor.ar(0,rate, 0, framesInBuffer,0);
 
+	output = BufRd.ar(1, b.bufnum, x);
 
+/*
 	output=
 	BPF.ar(BufRd.ar(1, b.bufnum, x), 158, 0.11,0.3)
 	+BPF.ar(BufRd.ar(1, b.bufnum, x), 600, 0.08,3.8)
 	+BPF.ar(BufRd.ar(1, b.bufnum, x), 8000, 0.01,0.00001)
 	+BPF.ar(BufRd.ar(1, b.bufnum, x), 12000, 0.04,0.000002)
 	+BPF.ar(BufRd.ar(1, b.bufnum, x), 16000, 0.04,0.000002);
+*/
 
 	output = LPF.ar(output, freq, amp);
 

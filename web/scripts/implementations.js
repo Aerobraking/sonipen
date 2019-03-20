@@ -9,6 +9,7 @@ class HandlerPenSonification extends HandlerBaseClass {
     constructor() {
         super("sonification");
         this.sinnode_id = 1234;
+        this.speedSmoothed = 0;
     }
 
     stopSounds() {
@@ -32,20 +33,25 @@ class HandlerPenSonification extends HandlerBaseClass {
         });
     }
 
-    update(penpoints, newPoint, lastPoint) {
+    update(listPoints, newPoint, lastPoint) {
         if (newPoint.speed > 0) {
 
 
             var amp = newPoint.pressure;
 
-            amp *= (Math.min(Math.pow(newPoint.speed, 1), 1));
+            this.speedSmoothed = this.speedSmoothed*0.4 + newPoint.speed * 0.6;
+        
+            amp *= (Math.min(Math.pow(this.speedSmoothed, 2), 1));
 
-            var speed = linlin(newPoint.speed, 0, 50, 0.1, 1);
+            var speed = linlin(this.speedSmoothed, 0, 50, 0.1, 1);
+            var rate = linlin(this.speedSmoothed, 0, 50, 0.8, 1.3);
 
+            console.log(amp);
+            
             if (newPoint.speed != lastPoint.speed) {
                 port.send({
                     address: "/n_set",
-                    args: [this.sinnode_id, "amp", amp, "freq", true ? speed * 13000 : 2600,
+                    args: [this.sinnode_id, "amp", amp, "freq", 600+ 0.3 * 2300 ,
                         "speed", speed, "rate", 1]
                 });
             }
@@ -90,7 +96,7 @@ class HandlerGuiding extends HandlerBaseClass {
         });
     }
 
-    update(penpoints, newPoint, lastPoint) {
+    update(listPoints, newPoint, lastPoint) {
 
         var angleDegree = (Math.floor(newPoint.curvature * 360 / Math.PI));
 
@@ -144,7 +150,7 @@ class HandlerAwareness extends HandlerBaseClass {
         });
     }
 
-    update(penpoints, newPoint, lastPoint) {
+    update(listPoints, newPoint, lastPoint) {
         if (newPoint.speed > 0) {
 
 
@@ -220,7 +226,7 @@ class HandlerTemplate extends HandlerBaseClass {
         });
     }
 
-    update(penpoints, newPoint, lastPoint) {
+    update(listPoints, newPoint, lastPoint) {
 
         var amp = linlin(newPoint.pressure, 0, 20, 0, 1);
 

@@ -387,7 +387,8 @@ class PenPoint {
         // the tilt value for the vertical plane
         this.tiltY = tiltY;
         // the maximal tilt of the pen 
-        this.tilt = Math.max(tiltX, tiltY);
+        this.tiltDegree = Math.max(Math.abs(tiltX), Math.abs(tiltY));
+        this.tilt = linlin(this.tiltDegree,0,90,0,1);
         // the timestamp where the event is recieved for this point
         this.timestamp = timestamp;
         // the time between the creation of this point and the last one
@@ -743,7 +744,7 @@ class HandlerBaseClass {
 
     quitSynths() { }
 
-    update(penpoints, newPoint, lastPoint) { }
+    update(listPoints, newPoint, lastPoint) { }
 
     stopSounds() { }
 
@@ -759,7 +760,11 @@ class HandlerBaseClass {
 
             var pointLast = penpoints[indexDrawing - 1];
 
-            cStatic.lineWidth = 2;
+
+            var lineWidth = 0.5 + 3* pointLast.tilt;
+
+            cStatic.lineWidth = lineWidth;
+		
             cStatic.strokeStyle = "rgba(40,40,40," + point.pressure + ")";
 
             cStatic.beginPath();
