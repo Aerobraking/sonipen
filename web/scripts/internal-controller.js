@@ -50,7 +50,7 @@ function draw() {
 
 		var pointLast = penpoints[indexUsage - 1];
 
-		var lineWidth = 1 + 2.5* pointLast.tilt;
+		var lineWidth = 2 + 1.5* pointLast.tilt;
 
 		cUsage.lineWidth = lineWidth;
 		cUsage.strokeStyle = "rgb(100,100,100)";
@@ -66,6 +66,7 @@ function draw() {
 
 var interpolate = 0;
 var isDown = false;
+
 
 function positionHandler(e) {
 	/* fairly ugly, unoptimised approach of manually replicating the targetTouches array */
@@ -85,8 +86,11 @@ function positionHandler(e) {
 				return;
 			}
 
+			var x = e.clientX*devicePixelRatio;
+			var y = e.clientY*devicePixelRatio;
+
 			var lastPoint = penpoints[penpoints.length - 1];
-			var newPoint = new PenPoint(e.clientX, e.clientY, e.pressure, e.tiltX, e.tiltY, 0, 0, !isDown);
+			var newPoint = new PenPoint(x, y, e.pressure, e.tiltX, e.tiltY, 0, 0, !isDown);
 
 
 			if (penpoints.length > 1 && newPoint.pressure > 0) {
@@ -233,14 +237,20 @@ function prepareCanvas() {
 
 	// HiDPI canvas adapted from http://www.html5rocks.com/en/tutorials/canvas/hidpi/
 	devicePixelRatio = window.devicePixelRatio || 1;
+	console.log("devicePixelRatio: "+devicePixelRatio);
 	canvas.width = window.innerWidth * devicePixelRatio;
 	canvas.height = window.innerHeight * devicePixelRatio;
 	canvas.style.width = window.innerWidth + 'px';
 	canvas.style.height = window.innerHeight + 'px';
-	c.scale(devicePixelRatio, devicePixelRatio);
+	//c.scale(devicePixelRatio, devicePixelRatio);
 
-	canvasStatic.width = window.innerWidth * devicePixelRatio;
+	canvasStatic.width = window.innerWidth * devicePixelRatio ;
 	canvasStatic.height = window.innerHeight * devicePixelRatio;
+
+	console.log("window height: "+window.innerHeight );
+	console.log("canvas width: "+canvasStatic.width);
+	console.log("canvas height: "+canvasStatic.height);
+
 	canvasStatic.style.width = window.innerWidth + 'px';
 	canvasStatic.style.height = window.innerHeight + 'px';
 
@@ -269,6 +279,8 @@ function prepareCanvas() {
 
 	// suppress context menu
 	canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); }, false)
+
+	
 }
 
 /* 

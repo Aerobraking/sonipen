@@ -703,8 +703,8 @@ class HandlerBaseClass {
         var img = document.createElement("img");
         img.src = path;
         img.setAttribute("src", path);
-        img.setAttribute("width", width / 2);
-        img.setAttribute("height", height / 2);
+        img.setAttribute("width", width );
+        img.setAttribute("height", height );
         img.style.position = "absolute";
         img.style.left = x + "px";
         img.style.top = y + "px";
@@ -718,9 +718,9 @@ class HandlerBaseClass {
         setTimeout(function () {
             var canvasImg = document.createElement('canvas');
             canvasImg.getContext('2d').scale(1, 1);
-            canvasImg.width = 3000;
-            canvasImg.height = 2000;
-            canvasImg.getContext('2d').drawImage(img, x, y, img.width * 2, img.height * 2);
+            canvasImg.width = window.innerWidth * devicePixelRatio;
+            canvasImg.height = window.innerWidth * devicePixelRatio;
+            canvasImg.getContext('2d').drawImage(img, x, y, img.width, img.height );
 
             var imageContainer = new ImageProbe(img, canvasImg, path, thisHandler.listImagesProbing, 0, x, y, width, height);
 
@@ -750,6 +750,7 @@ class HandlerBaseClass {
 
     drawStatic(width, height, c) {
 
+
         for (; indexDrawing < penpoints.length && penpoints.length > 1; indexDrawing++) {
 
             var point = penpoints[indexDrawing];
@@ -760,17 +761,17 @@ class HandlerBaseClass {
 
             var pointLast = penpoints[indexDrawing - 1];
 
-
             var lineWidth = 0.5 + 3* pointLast.tilt;
 
-            cStatic.lineWidth = lineWidth;
-		
-            cStatic.strokeStyle = "rgba(40,40,40," + point.pressure + ")";
+            c.lineWidth = lineWidth;
+        
+        
+            c.strokeStyle = "rgba(40,40,40," + point.pressure + ")";
 
-            cStatic.beginPath();
-            cStatic.moveTo(point.x, point.y);
-            cStatic.lineTo(pointLast.x, pointLast.y);
-            cStatic.stroke();
+            c.beginPath();
+            c.moveTo(point.x, point.y);
+            c.lineTo(pointLast.x, pointLast.y);
+            c.stroke();
         }
 
     }
