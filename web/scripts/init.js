@@ -748,13 +748,17 @@ class HandlerBaseClass {
      * @param {*} type 
      */
     addImageFitToCenter(path,imageWidth,imageHeight, type) {
+
+        var screenWidth= window.innerWidth  *  devicePixelRatio;
+        var screenHeight= window.innerHeight  *  devicePixelRatio;
+
         var x=0;
         var y=0;
         var width=0;
-        var height=window.innerHeight;
+        var height=screenHeight;
 
-        width= imageWidth * (window.innerHeight/imageHeight );
-        x = window.innerWidth /2 - (width/2);
+        width= imageWidth * (screenHeight/imageHeight );
+        x = screenWidth /2 - (width/2);
 
         console.log("width: "+width);
 
