@@ -699,6 +699,7 @@ class HandlerBaseClass {
         this.listImagesDrawing = [];
     }
 
+
     addImage(path, x, y, width, height, type) {
 
         var img = document.createElement("img");
@@ -709,11 +710,8 @@ class HandlerBaseClass {
         img.style.position = "absolute";
         img.style.left = x + "px";
         img.style.top = y + "px";
-        img.style.zIndex = 499;
-        // img.style.display = 'none';
-
-        document.body.appendChild(img);
-
+        img.style.zIndex = 499; 
+ 
         var thisHandler = this;
 
         setTimeout(function () {
@@ -740,6 +738,29 @@ class HandlerBaseClass {
         }, 300);
 
     }
+
+    /**
+     * Scales the given image to the screensize. It fits the image to height and then scales the width, appropially. So if your image
+     * is very wide, or your screen very small, it may stick outside the screen. It will also be scaled only once when the page is loaded. It will not be resized when the screen is resized.
+     * @param {*} path
+     * @param {*} imageWidth 
+     * @param {*} imageHeight 
+     * @param {*} type 
+     */
+    addImageFitToCenter(path,imageWidth,imageHeight, type) {
+        var x=0;
+        var y=0;
+        var width=0;
+        var height=window.innerHeight;
+
+        width= imageWidth * (window.innerHeight/imageHeight );
+        x = window.innerWidth /2 - (width/2);
+
+        console.log("width: "+width);
+
+        this.addImage(path,x,y,width,height,type);
+    }
+        
 
     startSynth() { }
 
@@ -789,6 +810,13 @@ class HandlerBaseClass {
                 var image = this.listImagesProbing[i];
                 c.drawImage(image.canvas, 0, 0, image.canvas.width , image.canvas.height );
             }
+
+            var lastPoint = penpoints[penpoints.length-1];
+            var lastCollisionPoint = lastPoint.imageCollisionPoints[lastPoint.imageCollisionPoints.length-1];
+            c.fillStyle = "rgb(255,255,255)";
+            c.fillRect(0,0,204,204);
+            c.fillStyle = "rgba("+lastCollisionPoint.r+","+lastCollisionPoint.g+","+lastCollisionPoint.b+",1)";
+            c.fillRect(2,2,200,200); 
         }        
 
         if (settings.showGrid) {

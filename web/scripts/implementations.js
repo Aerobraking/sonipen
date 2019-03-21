@@ -70,7 +70,7 @@ class HandlerGuiding extends HandlerBaseClass {
         super("guiding");
         this.sinnode_id = 1762;
         this.angleS = 0;
-        this.addImage("images/guiding_drawing.png", 0, 0, 3000, 2000, "drawing");
+        this.addImageFitToCenter("images/guiding_drawing.png",  3000, 2000, "drawing");
     }
 
     stopSounds() {
@@ -123,8 +123,8 @@ class HandlerAwareness extends HandlerBaseClass {
         super("awareness");
         this.sinnode_id = 1235;
         this.angleS = 0;
-        this.addImage("images/awareness_drawing.png", 0, 0, 3000, 2000, "drawing");
-        this.addImage("images/awareness_probing.png", 0, 0, 3000, 2000, "probing");
+        this.addImageFitToCenter("images/awareness_drawing.png", 3000,2000, "drawing");
+        this.addImageFitToCenter("images/awareness_probing.png", 3000,2000, "probing");
     }
 
     stopSounds() {
