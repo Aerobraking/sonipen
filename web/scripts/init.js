@@ -767,14 +767,26 @@ class HandlerBaseClass {
 
         this.addImage(path,x,y,width,height,type);
     }
-        
-
+            
+    /**
+     * Start the synths in supercollider. Is called when the handler becomes active. Updating the synths then happens in the update() method of the handler.
+     */
     startSynth() { }
 
+    /**
+     * Should be used to free the synths in supercollider. Is called when the handler won't be active anymore.
+     */
     quitSynths() { }
 
+    /**
+     * Is called when a new point was registered. Implement your update logic for your synths here to react to the 
+     * new drawn input.
+     */
     update(listPoints, newPoint, lastPoint) { }
 
+    /**
+     * This is called when the sound should stop, for example when the pen is moved up from the screen. 
+     */
     stopSounds() { }
 
     drawStatic(width, height, c) {

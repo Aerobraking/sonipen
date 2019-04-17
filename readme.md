@@ -49,4 +49,3 @@ Of course you can have a look at the init.js and internal-controller.js and exte
 ## Know Issues/Bugs
 
 - Some documentation is still missing
-- Sometimes supercollider kills the synth and then says "FAILURE IN SERVER /n_set Node 1235 not found" It could also be the javascript code that accidentally stops the synth. Have to find that out still.
