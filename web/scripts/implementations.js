@@ -39,18 +39,21 @@ class HandlerPenSonification extends HandlerBaseClass {
 
             var amp = newPoint.pressure;
 
-            this.speedSmoothed = this.speedSmoothed*0.4 + newPoint.speed * 0.6;
+            this.speedSmoothed = this.speedSmoothed*0.7 + newPoint.speed * 0.3;
         
             amp *= (Math.min(Math.pow(this.speedSmoothed, 2), 1));
 
             var speed = linlin(this.speedSmoothed, 0, 50, 0.1, 1);
-            var rate = linlin(this.speedSmoothed, 0, 50, 0.8, 1.3);
+            var rate = linlin(this.speedSmoothed, 0, 50, 0.95, 1.8);
+
+             lineValueCompare.append(new Date().getTime(), this.speedSmoothed);
+
 
             if (newPoint.speed != lastPoint.speed) {
                 port.send({
                     address: "/n_set",
-                    args: [this.sinnode_id, "amp", amp, "freq", 600+ 0.3 * 2300 ,
-                        "speed", speed, "rate", 1]
+                    args: [this.sinnode_id, "amp", amp, "freq", 4000+ speed * 4300 ,
+                        "speed", speed, "rate", rate]
                 });
             }
         } else {
@@ -161,9 +164,6 @@ class HandlerAwareness extends HandlerBaseClass {
             /**
             * Je dunkler, desto höher die frequenz. Wenn es rot ist, dann wird es silent.
             */
-           
-            // speed += 1.3 * linlin(newPoint.imageCollisionPoints[0].r, 255, 0, 0, 1);
-            
             for(var i = 0; i<newPoint.imageCollisionPoints.length; i++){
                 if (newPoint.imageCollisionPoints[i].r > 100 && newPoint.imageCollisionPoints[i].g < 100) {
                     speed *= 3;
@@ -217,22 +217,25 @@ class HandlerTemplate extends HandlerBaseClass {
     startSynth() {
         port.send({
             address: "/s_new",
-            args: ["sin", this.sinnode_id, 0, 0, "amp", 0]
+            args: ["template", this.sinnode_id, 0, 0, "amp", 0]
         });
     }
 
     update(listPoints, newPoint, lastPoint) {
 
         var amp = linlin(newPoint.pressure, 0, 20, 0, 1);
+        var freq = 800;
 
         if (newPoint.imageCollisionPoints.length > 0) {
+            // louder when the image is darker
             amp += linlin(newPoint.imageCollisionPoints[0].r, 0, 255, 1, 0);
+            freq-= linlin(newPoint.imageCollisionPoints[0].r, 100, 255, 0, 600)
         }
 
         if (lastPoint.speed != newPoint.speed) {
             port.send({
                 address: "/n_set",
-                args: [this.sinnode_id, "amp", amp, "freq", 800]
+                args: [this.sinnode_id, "amp", amp, "freq", freq]
             });
         }
     }

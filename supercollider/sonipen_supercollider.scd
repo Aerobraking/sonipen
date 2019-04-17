@@ -14,7 +14,7 @@ FreqScope.new(400);
 If the autmatic relative path creation doesn't work, you have to
 set the absolute paths manually here.
 */
-var whitenoise = PathName(thisProcess.nowExecutingPath).pathOnly ++ "sounds/whitenoise.wav";
+var whitenoise = PathName(thisProcess.nowExecutingPath).pathOnly ++ "sounds/bleistift.wav";
 
 // allocate a buffer with a sound file
 b = Buffer.read(s,whitenoise);

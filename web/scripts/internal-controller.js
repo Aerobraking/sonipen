@@ -23,6 +23,7 @@ var indexUsage = 1;
 
 var activeHandler;
 
+
 function draw() {
 
 	c.clearRect(0, 0, canvas.width, canvas.height);
@@ -60,12 +61,26 @@ function draw() {
 var interpolate = 0;
 var isDown = false;
 
+var smoothie = new SmoothieChart(
+	{millisPerPixel:3,interpolation:'step'});
+var lineValue = new TimeSeries();
+var lineValueCompare = new TimeSeries(); 
+
+smoothie.addTimeSeries(lineValue,{ strokeStyle:'rgb(0, 255, 0)', fillStyle:'rgba(0, 255, 0,0)', lineWidth:0.5 });
+smoothie.addTimeSeries(lineValueCompare,{ strokeStyle:'rgb(255, 0, 0)', fillStyle:'rgba(0, 255, 0,0)', lineWidth:1 });
+
 
 function positionHandler(e) {
 	/* fairly ugly, unoptimised approach of manually replicating the targetTouches array */
+	console.log("event: "+ e.type);
 	switch (e.type) {
 		case 'pointerdown':
 		case 'pointermove':
+				
+			/**
+			 * Hotfix for Firefox support, as the pressure is always 0 in Firefox.
+			 */
+			var pressure = navigator.userAgent.toLowerCase().indexOf('firefox') > -1? 0.5: e.pressure;
 
 			/**
 			 * When you don't want to use every pen move event, but only every n-th event, this value 
@@ -75,7 +90,7 @@ function positionHandler(e) {
 				return;
 			}
 
-			if (e.pressure == 0) {
+			if (pressure == 0) {
 				return;
 			}
 
@@ -83,9 +98,10 @@ function positionHandler(e) {
 			var y = e.clientY*devicePixelRatio;
 
 			var lastPoint = penpoints[penpoints.length - 1];
-			var newPoint = new PenPoint(x, y, e.pressure, e.tiltX, e.tiltY, 0, 0, !isDown);
+			var newPoint = new PenPoint(x, y, pressure, e.tiltX, e.tiltY, 0, 0, !isDown);
 
-
+			lineValue.append(new Date().getTime(), newPoint.speed);
+			
 			if (penpoints.length > 1 && newPoint.pressure > 0) {
 				activeHandler.update(penpoints, newPoint, lastPoint);
 			} else {
@@ -94,6 +110,8 @@ function positionHandler(e) {
 
 			isDown = true;
 
+			smoothie.start();
+			console.log("start");
 			break;
 		case 'pointerup':
 		case 'pointerout':
@@ -101,8 +119,10 @@ function positionHandler(e) {
 		case 'MSPointerUp':
 		case 'MSPointerOut':
 		case 'MSPointerCancel':
+			console.log("end");
 			activeHandler.stopSounds();
 			isDown = false;
+			smoothie.stop();
 			break;
 	}
 
@@ -124,11 +144,19 @@ function init() {
 	 */
 	window.onkeydown = function (e) {
 		let key = event.key.toUpperCase();
-		activeHandler.quitSynths();
+		
+ 
+		if(key=="D"){
+			document.getElementById("debug-canvas").style.zIndex=-document.getElementById("debug-canvas").style.zIndex;
+		}
 
-		var number= parseInt(key);
-
-		setActiveHandler(handlerList[number-1].id);
+		if(!isNaN(key)){
+			var number= parseInt(key);
+			activeHandler.quitSynths();
+			setActiveHandler(handlerList[number-1].id);
+		}
+	
+		
 	}
 
 	/**
@@ -212,6 +240,9 @@ function setActiveHandler(value){
 	settings.reset();
 	activeHandler.startSynth();
 	window.requestAnimationFrame(draw);
+
+
+	smoothie.streamTo(document.getElementById("debug-canvas"));
 }
 
 /**

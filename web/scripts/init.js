@@ -403,6 +403,9 @@ class PenPoint {
         this.calcCurvature();
         this.calcCollision();
 
+        this.curvatureDegreesSmoothed = 0;
+        this.curvatureDegreesSmoothed = this.curvatureDegrees * 0.8 + this.curvatureDegreesSmoothed +0.2; 
+
         /**
          * The speed of the pen between this and the last point. We don't use the timestep value for that, as 
          * it is not giving us the real time between the inputs but only between the recieving of the events for the inputs. So we use an average value of 0.03, that gives us a quite good and stable speed value. 
