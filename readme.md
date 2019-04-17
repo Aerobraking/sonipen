@@ -48,6 +48,5 @@ Of course you can have a look at the init.js and internal-controller.js and exte
 
 ## Know Issues/Bugs
 
-- There have to be a better implementation for the scaling of alle the canvas/images. For now it works on a SurfaceBook, when you give all images the same resolution as the display. But that's only implemented as a workaround. I have to make an implementation that handles the scaling of the canvas and images correctly, without the need of the workarounds (because for example the pixel coordinates in the canvas are the resolution of the display divided by half, the images are the full resolution, so I have to convert it by multiply the coordinates by two) 
 - Some documentation is still missing
 - Sometimes supercollider kills the synth and then says "FAILURE IN SERVER /n_set Node 1235 not found" It could also be the javascript code that accidentally stops the synth. Have to find that out still.
