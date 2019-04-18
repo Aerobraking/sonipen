@@ -68,11 +68,15 @@ var lineValueCompare = new TimeSeries();
 
 smoothie.addTimeSeries(lineValue,{ strokeStyle:'rgb(0, 255, 0)', fillStyle:'rgba(0, 255, 0,0)', lineWidth:0.5 });
 smoothie.addTimeSeries(lineValueCompare,{ strokeStyle:'rgb(255, 0, 0)', fillStyle:'rgba(0, 255, 0,0)', lineWidth:1 });
+smoothie.stop();
 
+function isDebugPlotterVisible(){
+	return document.getElementById("debug-canvas").style.zIndex>0;
+}
 
 function positionHandler(e) {
 	/* fairly ugly, unoptimised approach of manually replicating the targetTouches array */
-	console.log("event: "+ e.type);
+
 	switch (e.type) {
 		case 'pointerdown':
 		case 'pointermove':
@@ -80,17 +84,13 @@ function positionHandler(e) {
 			/**
 			 * Hotfix for Firefox support, as the pressure is always 0 in Firefox.
 			 */
-			var pressure = navigator.userAgent.toLowerCase().indexOf('firefox') > -1? 0.5: e.pressure;
-
+			// var pressure = navigator.userAgent.toLowerCase().indexOf('firefox') > -1? 0.5: e.pressure;
+			var pressure = e.pressure;
 			/**
 			 * When you don't want to use every pen move event, but only every n-th event, this value 
 			 * is the n value for that.
 			 */
 			if (interpolate++ % 1 != 0) {
-				return;
-			}
-
-			if (pressure == 0) {
 				return;
 			}
 
@@ -100,8 +100,10 @@ function positionHandler(e) {
 			var lastPoint = penpoints[penpoints.length - 1];
 			var newPoint = new PenPoint(x, y, pressure, e.tiltX, e.tiltY, 0, 0, !isDown);
 
-			lineValue.append(new Date().getTime(), newPoint.speed);
-			
+			if (isDebugPlotterVisible()) {
+				lineValue.append(new Date().getTime(), newPoint.speed);
+			}
+
 			if (penpoints.length > 1 && newPoint.pressure > 0) {
 				activeHandler.update(penpoints, newPoint, lastPoint);
 			} else {
@@ -110,8 +112,10 @@ function positionHandler(e) {
 
 			isDown = true;
 
-			smoothie.start();
-			console.log("start");
+			if (isDebugPlotterVisible()) {
+				smoothie.start();
+			}
+		
 			break;
 		case 'pointerup':
 		case 'pointerout':
@@ -119,10 +123,13 @@ function positionHandler(e) {
 		case 'MSPointerUp':
 		case 'MSPointerOut':
 		case 'MSPointerCancel':
-			console.log("end");
+	
 			activeHandler.stopSounds();
 			isDown = false;
-			smoothie.stop();
+
+			if (isDebugPlotterVisible()) {
+				smoothie.stop();
+			}
 			break;
 	}
 
@@ -139,6 +146,8 @@ function init() {
 	
 	prepareCanvas();
 
+	smoothie.streamTo(document.getElementById("debug-canvas"));
+
 	/**
 	 * Switch between the available handlers.
 	 */
@@ -148,6 +157,9 @@ function init() {
  
 		if(key=="D"){
 			document.getElementById("debug-canvas").style.zIndex=-document.getElementById("debug-canvas").style.zIndex;
+			if (!isDebugPlotterVisible()) {
+				smoothie.stop();
+			}
 		}
 
 		if(!isNaN(key)){
@@ -242,7 +254,6 @@ function setActiveHandler(value){
 	window.requestAnimationFrame(draw);
 
 
-	smoothie.streamTo(document.getElementById("debug-canvas"));
 }
 
 /**
