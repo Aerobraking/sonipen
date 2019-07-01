@@ -44,12 +44,12 @@ class HandlerPenSonification extends HandlerBaseClass {
          * Mache den sound lauter je schneller der stift sich bewegt und je größer die pressure ist.
          */
         var amp = newPoint.pressure;
-        amp *= 0.4 * (Math.max(Math.min(Math.pow(this.speedSmoothed / 5, 2), 1) - 0, 0));
+        amp *= 0.4 * (Math.max(Math.min(Math.pow(this.speedSmoothed / 3, 2), 1) - 0, 0));
 
         /**
          * Verändere die low pass filter frequenz anhand der geschwindigkeit
          */
-        var freqLowPass = midicps(linlin(this.speedSmoothed, 0, 50, 69 + 20, 105 + 20));
+        var freqLowPass = midicps(linlin(this.speedSmoothed, 0, 50, 69 + 35, 105 + 15));
 
         /**
          * Verändere die geschwindigkeit des abspielens des buffers anhand der geschwindigkeit
@@ -60,7 +60,7 @@ class HandlerPenSonification extends HandlerBaseClass {
          * verringere frequenz wenn man über bereits gemalten bereich malt.
          */
         if (newPoint.collision) {
-            freqLowPass /= 2;
+            freqLowPass *= 2;
         }
 
         if (newPoint.speed != lastPoint.speed) {

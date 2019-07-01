@@ -19,7 +19,7 @@ var localAdress = "127.0.0.1";
 var localPort = 57121;
 var remoteAdress = localAdress;
 var remotePort = 57110;
-var webSocketPort = 8080;
+var webSocketPort = 8081;
 
 var osc = require("osc"),
     WebSocket = require("ws");

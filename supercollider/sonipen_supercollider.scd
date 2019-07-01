@@ -44,20 +44,8 @@ SynthDef( \pen, { | out=0, amp=1, freq=100, rate=1, lg=0.05, pan=0 |
     x = Phasor.ar(0,rate, 0, framesInBuffer,0);
 
 	output = BufRd.ar(1, b.bufnum, x);
-
-	//output = WhiteNoise.ar(1);
-
-/*
-	output=
-	BPF.ar(BufRd.ar(1, b.bufnum, x), 158, 0.11,0.3)
-	+BPF.ar(BufRd.ar(1, b.bufnum, x), 600, 0.08,3.8)
-	+BPF.ar(BufRd.ar(1, b.bufnum, x), 8000, 0.01,0.00001)
-	+BPF.ar(BufRd.ar(1, b.bufnum, x), 12000, 0.04,0.000002)
-	+BPF.ar(BufRd.ar(1, b.bufnum, x), 16000, 0.04,0.000002);
-*/
-
+ 
 	output = LPF.ar(output, freq.lag(lg), amp);
-
 
 	Out.ar( out, Pan2.ar(output, pan));
 }).add;
