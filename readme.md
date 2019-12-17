@@ -11,11 +11,13 @@ For Chrome, the website needs to run on a (local) http server, otherwise the get
 
 ### Setup everything
 
-1. Install Node.js. You can get the installer here: https://nodejs.org/en/
+1. Install Node.js (tested with version 10.15.0, newer versions may not work because of a node-gyp rebuild error). You can get the installer here: https://nodejs.org/en/
 
 2. Install Supercollider (testet with version 3.9.3). You can get the installer here: https://supercollider.github.io/download
 
 3. Navigate to the /nodejs folder in the command line and run <code>npm install</code>
+
+4. (You might have to install a current python 2.X version)
 
 ### Start the project
 
