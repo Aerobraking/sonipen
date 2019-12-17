@@ -74,123 +74,13 @@ function isDebugPlotterVisible(){
 	return document.getElementById("debug-canvas").style.zIndex>0;
 }
 
-// Define an Infusion component that represents your instrument.
-fluid.defaults("myStuff.sinewaver", {
-    gradeNames: ["flock.synth"],
-
-    // Define the synthDef for your instrument.
-    synthDef: {
-        id: "carrier",
-        ugen: "flock.ugen.sin",
-        freq: 220,
-        mul: 0.5
-    }
-});
-
-var synth = flock.synth({
-    synthDef: {
-        ugen: "flock.ugen.sinOsc"
-    }
-});
-
-
-
-// Define an Infusion component that represents your composition.
-fluid.defaults("myStuff.composition", {
-    gradeNames: ["fluid.component"],
-
-    // This composition has two components:
-    //  1. our sinewaver instrument (defined above)
-    //  2. an instance of the Flocking environment
-    components: {
-        environment: {
-            type: "flock.enviro"
-        },
-
-        instrument: {
-            type: "myStuff.sinewaver"
-        }
-    },
-
-    // This section registers listeners for our composition's "onCreate" event,
-    // which is one of the built-in lifecycle events for Infusion.
-    // When onCreate fires, we start the Flocking environment.
-    listeners: {
-        "onCreate.startEnvironment": {
-            func: "{environment}.start"
-        }
-    }
-});
-
-var isPlaying=false; 
 function positionHandler(e) {
 	/* fairly ugly, unoptimised approach of manually replicating the targetTouches array */
-//	window.alert("positionHandler");
-	e.preventDefault();
-
-	if(false)
-{    for(var i = 0; i < e.touches.length; i++){
-		if(e.touches[i].touchType === "stylus"){
-		
-			
-			/**
-			 * Hotfix for Firefox support, as the pressure is always 0 in Firefox.
-			 */
-			// var pressure = navigator.userAgent.toLowerCase().indexOf('firefox') > -1? 0.5: e.pressure;
-			var pressure = e.touches[i].pressure;
-			var pressure = 1;
-			/**
-			 * When you don't want to use every pen move event, but only every n-th event, this value 
-			 * is the n value for that.
-			 */
-			if (interpolate++ % 1 != 0) {
-				return;
-			}
-
-			var x = e.touches[i].clientX*devicePixelRatio;
-			var y = e.touches[i].clientY*devicePixelRatio;
-
-			var lastPoint = penpoints[penpoints.length - 1];
-			var newPoint = new PenPoint(x, y, pressure, e.touches[i].tiltX, e.touches[i].tiltY, 0, 0, !isDown);
-
-			if (isDebugPlotterVisible()) {
-				lineValue.append(new Date().getTime(), newPoint.speed);
-			}
-
-			if (penpoints.length > 1 && newPoint.pressure > 0 ) {
-				if(!isPlaying){
-					synth.play();
-					isPlaying=true;
-				}
-				activeHandler.update(penpoints, newPoint, lastPoint);
-			} else {
-				activeHandler.stopSounds(); 
-				synth.pause();
-				isPlaying=false;
-			}
-
-			isDown = true;
-
-			if (isDebugPlotterVisible()) {
-				smoothie.start();
-			}
-
-			if(e.touches[i].type==	'touchend'){
-				activeHandler.stopSounds();
-				isDown = false;
-				synth.pause();
-				isPlaying=false;
-			}
-
-		}
-	   }
-	}
 
 	switch (e.type) {
 		case 'pointerdown':
 		case 'pointermove':
-	
-		
+				
 			/**
 			 * Hotfix for Firefox support, as the pressure is always 0 in Firefox.
 			 */
@@ -215,15 +105,9 @@ function positionHandler(e) {
 			}
 
 			if (penpoints.length > 1 && newPoint.pressure > 0) {
-				if(!isPlaying){
-					// synth.play();
-					isPlaying=true;
-				}
 				activeHandler.update(penpoints, newPoint, lastPoint);
 			} else {
 				activeHandler.stopSounds();
-				// synth.pause();
-				isPlaying=false;
 			}
 
 			isDown = true;
@@ -233,21 +117,18 @@ function positionHandler(e) {
 			}
 		
 			break;
-		case 'touchend':
 		case 'pointerup':
 		case 'pointerout':
 		case 'pointercancel':
 		case 'MSPointerUp':
 		case 'MSPointerOut':
 		case 'MSPointerCancel':
-				
-			// synth.pause();
-			isPlaying=false;	
+	
 			activeHandler.stopSounds();
 			isDown = false;
 
 			if (isDebugPlotterVisible()) {
-				smoothie.pause();
+				smoothie.stop();
 			}
 			break;
 	}
@@ -420,17 +301,14 @@ function prepareCanvas() {
 			'touchstart', 'touchmove', 'touchend', 'touchcancel'];
 	}
 
-	// events = ['pointerover', 'pointerdown', 'pointermove', 'pointerup', 'pointerout', 'pointercancel',
-	// 'MSPointerOver', 'MSPointerDown', 'MSPointerMove', 'MSPointerUp', 'MSPointerOut', 'MSPointerCancel', 'mouseover', 'mousedown', 'mousemove', 'mouseup', 'mouseout',
-	// 		'touchstart', 'touchmove', 'touchend', 'touchcancel'];
-
 	for (var i = 0, l = events.length; i < l; i++) {
 		canvas.addEventListener(events[i], positionHandler, false);
 	}
 
 	// suppress context menu
 	canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); }, false)
- 
+
+	
 }
 
 /* 
