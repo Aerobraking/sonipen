@@ -353,6 +353,7 @@ class Settings {
  * It contains various informations, beginning from the x,y coordinates up to the curvature at this point or the "collision" with other strokes.
  */
 class PenPoint {
+
     constructor(x, y, pressure, tiltX, tiltY, timestamp, timestep, isStartPoint) {
 
         // add the point to the list
@@ -398,7 +399,6 @@ class PenPoint {
         // the curvature in degrees
         this.curvatureDegrees = 0;
 
-
         this.calcDistance();
         this.calcCurvature();
         this.calcCollision();
@@ -408,6 +408,7 @@ class PenPoint {
          * it is not giving us the real time between the inputs but only between the recieving of the events for the inputs. So we use an average value of 0.03, that gives us a quite good and stable speed value. 
          */
         this.speed = isStartPoint ? 0 : this.distance / 0.03;
+        
     }
 
     /**
@@ -649,6 +650,7 @@ class PenPoint {
 
 
     }
+
 }
 
 /**
@@ -662,7 +664,7 @@ var settings = new Settings();
 var penpoints = [];
 
 /**
- * The are used in the curvature calculation in the PenPoint
+ * These are used in the curvature calculation in the PenPoint
  */
 var anglePoint1, anglePoint2, anglePoint3,
     vector1, vector2, vector1N, vector2N,
@@ -764,14 +766,26 @@ class HandlerBaseClass {
 
         this.addImage(path,x,y,width,height,type);
     }
-        
-
+            
+    /**
+     * Start the synths in supercollider. Is called when the handler becomes active. Updating the synths then happens in the update() method of the handler.
+     */
     startSynth() { }
 
+    /**
+     * Should be used to free the synths in supercollider. Is called when the handler won't be active anymore.
+     */
     quitSynths() { }
 
+    /**
+     * Is called when a new point was registered. Implement your update logic for your synths here to react to the 
+     * new drawn input.
+     */
     update(listPoints, newPoint, lastPoint) { }
 
+    /**
+     * This is called when the sound should stop, for example when the pen is moved up from the screen. 
+     */
     stopSounds() { }
 
     drawStatic(width, height, c) {
@@ -787,7 +801,7 @@ class HandlerBaseClass {
 
             var pointLast = penpoints[indexDrawing - 1];
 
-            var lineWidth = 1 + 5* pointLast.tilt;
+            var lineWidth = 1 + 2.5* pointLast.tilt;
 
             c.lineWidth = lineWidth;
         
@@ -872,20 +886,26 @@ class HandlerBaseClass {
 
                     var points = calcStraightLine(lastPoint, currentPoint);
 
-                    c.fillStyle = "rgba(255,0,255,1)";
-                    c.fillRect(xMin, yMin, width, height);
-
-                    // c.fillStyle = "rgba(0,0,255,1)";
-
-                    var imageData = cUsage.getImageData(xMin, yMin, width, height);
-
-                    for (var x = 0; x < width; x++) {
-                        for (var y = 0; y < height; y++) {
-                            var pixel = getPixelFromImageData(imageData, x, y, width, 1);
-                            c.fillStyle = "rgba(" + pixel.r + "," + pixel.g + "," + pixel.b + ",1)";
-                            c.fillRect(x, y, 1, 1);
+                    /**
+                     * draws the image data that is used for the collison, very performance heavy.
+                     */
+                    if(false){
+                        c.fillStyle = "rgba(255,0,255,1)";
+                        c.fillRect(xMin, yMin, width, height);
+    
+                        // c.fillStyle = "rgba(0,0,255,1)";
+    
+                        var imageData = cUsage.getImageData(xMin, yMin, width, height);
+    
+                        for (var x = 0; x < width; x++) {
+                            for (var y = 0; y < height; y++) {
+                                var pixel = getPixelFromImageData(imageData, x, y, width, 1);
+                                c.fillStyle = "rgba(" + pixel.r + "," + pixel.g + "," + pixel.b + ",1)";
+                                c.fillRect(x, y, 1, 1);
+                            }
                         }
                     }
+                
 
                 }
 

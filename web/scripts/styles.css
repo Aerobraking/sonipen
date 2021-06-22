@@ -2,6 +2,7 @@ body {
 	background-color: #fff;
 	margin: 0px;
 	overflow: hidden;
+	touch-action: none;
 }
 html{
 	overflow: hidden;
@@ -11,6 +12,7 @@ canvas {
 	display:block; 
 	position:absolute; 
 	overflow: hidden;
+	touch-action: none;
 }
 .container {
 	width:auto;
