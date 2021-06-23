@@ -1,4 +1,4 @@
-# Sonification of a digital pen on a screen.
+# Sonification of a stylus on a screen.
 
 This project is a base for creating sonifications of pen input in the browser.
 
